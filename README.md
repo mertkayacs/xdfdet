@@ -67,6 +67,24 @@ All models trained 3 times on FaceForensics++ (1000 video pairs, 70/15/15 split)
 - Frame-level spatial analysis only — no temporal modeling (LSTM, attention over frames).
 - Single backbone architecture (EfficientNet-B4).
 
+## Reproduction
+
+Two paths are supported.
+
+**Option A — reproduce from scratch (train).**
+1. Place the FaceForensics++ videos under `DATA_ROOT` (see `01_data_preparation`). The same subset as the thesis is used: 1000 real/fake pairs across FaceSwap, Face2Face, FaceShifter, and Deepfakes, split 70/15/15.
+2. Run `01_data_preparation` and `02_preprocessing_pipeline` to build the pairs and the preprocessing functions.
+3. Run `03_training` with `USE_PRETRAINED = False` to train the selected `ACTIVE_CONFIG`. Weights are written to `weights/<config>.h5`.
+4. Run `04_evaluation` and `05_explainability`.
+
+**Option B — use the pretrained weights.**
+1. Download the trained weights from: <!-- TODO: add weights download link (e.g., Hugging Face) -->
+2. In `03_training`, set `USE_PRETRAINED = True` and either set `WEIGHTS_URL` to the direct download link or place the `.h5` file at `weights/<config>.h5`.
+3. Run `01_data_preparation` and `02_preprocessing_pipeline` (needed to build the test set and preprocessing functions).
+4. Run `03_training` (it loads the weights instead of training), then `04_evaluation` and `05_explainability`.
+
+> FaceForensics++ is distributed under its own license; obtain dataset access from the dataset authors.
+
 ## Repository Structure
 
 ```
