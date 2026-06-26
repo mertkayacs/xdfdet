@@ -7,6 +7,8 @@ This repository contains the code and experiments for regional explainability an
 > Supervisor: Asst. Prof. Dr. Venera Adanova  
 > DOI: [10.5281/zenodo.18998566](https://doi.org/10.5281/zenodo.18998566)
 
+> **Reference implementation.** The thesis linked above is the authoritative and complete description of the methodology, configurations, and results — including the full true/false positive and negative regional activation analyses and the per-region standard-deviation analysis. The notebooks here provide the core training and explainability pipeline; for the exact hyperparameters and the complete set of figures, refer to the thesis.
+
 ## Motivation
 
 Deepfake detection models regularly report AUC scores above 0.90, yet they remain largely unusable in contexts where decisions must be justified. A binary "real/fake" output with a confidence score is not sufficient when:
