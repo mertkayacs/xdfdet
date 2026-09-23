@@ -85,6 +85,27 @@ def _align_and_crop(frame, box, left_eye, right_eye, size, margin):
     return cv2.resize(rotated[y0:y1, x0:x1], (size, size))
 
 
+def read_evenly(path, count):
+    """`count` evenly spaced RGB frames at full resolution.
+
+    Reads forward through the video: seeking to each frame gives the same pixels
+    but costs about ten times as long on H.264 files.
+    """
+    cap = cv2.VideoCapture(str(path))
+    total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    wanted = np.bincount(np.linspace(0, max(0, total - 1), count, dtype=int))  # repeats on short clips
+    frames = []
+    for times in wanted:
+        if not cap.grab():
+            break
+        if times:
+            ok, frame = cap.retrieve()
+            if ok:
+                frames += [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)] * int(times)
+    cap.release()
+    return frames
+
+
 def crop_faces(path, frames=CROP_FRAMES, size=IMG_SIZE, margin=MARGIN, detector=None):
     """Detect, eye-align and crop the main face in `frames` evenly spaced frames.
 
@@ -94,15 +115,7 @@ def crop_faces(path, frames=CROP_FRAMES, size=IMG_SIZE, margin=MARGIN, detector=
     if detector is None:
         from mtcnn import MTCNN
         detector = MTCNN()
-    cap = cv2.VideoCapture(str(path))
-    total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    raw = []
-    for idx in np.linspace(0, max(0, total - 1), frames, dtype=int):
-        cap.set(cv2.CAP_PROP_POS_FRAMES, int(idx))
-        ok, frame = cap.read()
-        if ok:
-            raw.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    cap.release()
+    raw = read_evenly(path, frames)
 
     crops, last = [], None
     for frame in raw:

@@ -2,7 +2,10 @@ import numpy as np
 import pytest
 
 from conftest import write_clip
-from xdfdet.video import crop_faces, frame_indices, normalize, denormalize, read_frames, read_pair
+import cv2
+
+from xdfdet.video import (crop_faces, denormalize, frame_indices, normalize, read_evenly, read_frames,
+                          read_pair)
 
 
 def test_frame_sampling_matches_original_runs():
@@ -22,6 +25,19 @@ def test_read_pair_is_aligned(clip_tree):
     real, fake = read_pair(clip_tree / "000.mp4", clip_tree / "FaceSwap" / "000_001.mp4")
     assert len(real) == len(fake) == 12
     assert np.abs(real[0][100:120, 100:130].astype(int) - fake[0][100:120, 100:130]).mean() > 50
+
+
+@pytest.mark.parametrize("count", [4, 32])
+def test_read_evenly_matches_seeking(clip_tree, count):
+    path = clip_tree / "000.mp4"
+    cap = cv2.VideoCapture(str(path))
+    total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    seeked = []
+    for idx in np.linspace(0, total - 1, count, dtype=int):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, int(idx))
+        seeked.append(cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB))
+    frames = read_evenly(path, count)
+    assert len(frames) == count and all(np.array_equal(a, b) for a, b in zip(frames, seeked))
 
 
 def test_crop_faces_finds_the_face(clip_tree):
