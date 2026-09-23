@@ -2,7 +2,7 @@
 
 **Where does a deepfake detector look?** This project studies how training-time preprocessing shapes an EfficientNet-B4 deepfake detector: its accuracy, its calibration, and the facial regions its decisions rely on, measured with Grad-CAM.
 
-[Project page](https://xdfdet.mertkayacs.com) ([Türkçe](https://xdfdet.mertkayacs.com/tr/), [Deutsch](https://xdfdet.mertkayacs.com/de/)) · [Models on Hugging Face](https://huggingface.co/mertkayacs/xdfdet) · [Thesis](https://doi.org/10.5281/zenodo.18998566)
+[Project page](https://xdfdet.mertkayacs.com) ([Türkçe](https://xdfdet.mertkayacs.com/tr/), [Deutsch](https://xdfdet.mertkayacs.com/de/)) · [Models on Hugging Face](https://huggingface.co/mertkayacs/xdfdet) · [Kaggle](https://www.kaggle.com/models/mertilovski/xdfdet) · [Thesis](https://doi.org/10.5281/zenodo.18998566)
 
 <table>
   <tr>
@@ -173,7 +173,7 @@ Tests run on a CPU without the dataset: `pip install -e ".[test]" && pytest`. To
 
 ## Models
 
-Eight trained detectors are available on [Hugging Face](https://huggingface.co/mertkayacs/xdfdet) under CC BY-NC 4.0, one `.keras` file per configuration, named as in the tables. `xdfdet.load_model(name)` downloads and loads one. The checkpoint of the ninth configuration, `aug-intense`, was lost.
+Eight trained detectors are available on [Hugging Face](https://huggingface.co/mertkayacs/xdfdet) and [Kaggle](https://www.kaggle.com/models/mertilovski/xdfdet) under CC BY-NC 4.0, one `.keras` file per configuration, named as in the tables. `xdfdet.load_model(name)` downloads and loads one. The checkpoint of the ninth configuration, `aug-intense`, was lost.
 
 ## Notes on the original runs
 
