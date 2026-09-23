@@ -1,10 +1,13 @@
 """Training-time perturbations: SSIM-guided polygon cutout, star cutout, Albumentations."""
 
+import os
 import random
 
 import cv2
 import numpy as np
 from skimage.metrics import structural_similarity
+
+os.environ.setdefault("NO_ALBUMENTATIONS_UPDATE", "1")  # albumentations checks PyPI on import otherwise
 
 from .config import (AUGMENT_LEVELS, MAX_AREA_RATIO, MIN_AREA_RATIO, SSIM_BIN, STAR_MAX_R,
                      STAR_MIN_R)
