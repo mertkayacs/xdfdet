@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xdfdet"
+version = "1.0.0"
+description = "Frame-level deepfake detection with Grad-CAM region analysis (EfficientNet-B4, FaceForensics++)"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+authors = [{ name = "Mert Kaya" }]
+requires-python = ">=3.10,<3.13"
+# Pinned to the versions the released models were trained with (Colab, August 2025).
+dependencies = [
+    "tensorflow==2.19.0",
+    "keras==3.10.0",
+    "albumentations==1.4.14",
+    "albucore==0.0.14",
+    "opencv-python-headless==4.12.0.88",
+    "scikit-image>=0.24",
+    "scikit-learn>=1.4",
+    "dlib-bin>=19.24",
+    "mtcnn==1.0.0",
+    "huggingface_hub>=0.24",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+xdfdet = "xdfdet.cli:main"
+
+[project.urls]
+Homepage = "https://xdfdet.mertkayacs.com"
+Models = "https://huggingface.co/mertkayacs/xdfdet"
+Thesis = "https://doi.org/10.5281/zenodo.18998566"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
