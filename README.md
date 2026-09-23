@@ -1,32 +1,35 @@
 # xdfdet
 
-**Where does a deepfake detector look?** Code and trained models for the paper *Augmentation and Cutout in Deepfake Detection: A Comparative Study of Accuracy, Calibration, and Attention* (UBMK 2026) and the MSc thesis it comes from.
+**Where does a deepfake detector look?** We trained a computer to spot fake face videos, then made it show which part of the face it looked at before deciding.
 
 [Project page](https://xdfdet.mertkayacs.com) ([Türkçe](https://xdfdet.mertkayacs.com/tr/), [Deutsch](https://xdfdet.mertkayacs.com/de/)) · [Models on Hugging Face](https://huggingface.co/mertkayacs/xdfdet) · [Thesis](https://doi.org/10.5281/zenodo.18998566)
 
 <table>
   <tr>
-    <td align="center"><img src="docs/figures/gradcam-baseline.webp" width="180" alt="Grad-CAM, baseline"><br><sub><code>baseline</code></sub></td>
-    <td align="center"><img src="docs/figures/gradcam-aug-standard.webp" width="180" alt="Grad-CAM, standard augmentation"><br><sub><code>aug-standard</code></sub></td>
-    <td align="center"><img src="docs/figures/gradcam-cutout-black.webp" width="180" alt="Grad-CAM, black-fill cutout"><br><sub><code>cutout-black</code></sub></td>
-    <td align="center"><img src="docs/figures/gradcam-aug-cutout-black.webp" width="180" alt="Grad-CAM, augmentation with black-fill cutout"><br><sub><code>aug-cutout-black</code></sub></td>
+    <td align="center"><img src="docs/figures/gradcam-baseline.webp" width="180" alt="Heat map, baseline detector"><br><sub>Baseline</sub></td>
+    <td align="center"><img src="docs/figures/gradcam-aug-standard.webp" width="180" alt="Heat map, standard augmentation"><br><sub>Random edits</sub></td>
+    <td align="center"><img src="docs/figures/gradcam-cutout-black.webp" width="180" alt="Heat map, black patch"><br><sub>Patch</sub></td>
+    <td align="center"><img src="docs/figures/gradcam-aug-cutout-black.webp" width="180" alt="Heat map, best detector"><br><sub><b>Both (best)</b></sub></td>
   </tr>
 </table>
 
-*Four of the released models on the same public-domain NASA portrait. All four call it real, and each one looks somewhere else: the baseline's attention is weak and partly off the face, while the best model (right) concentrates on the eyes and eyebrows.*
+*Four of our detectors look at the same real photo. All four say "real", but each one looks somewhere else.*
 
-We trained an EfficientNet-B4 video classifier on FaceForensics++ under nine preprocessing settings that vary data augmentation and cutout. Each setting was scored with four metrics, and Grad-CAM was measured in eight face regions to see what each model relies on. This repository has the full pipeline as a Python package, eight of the nine trained models, and the scripts behind every figure.
+This repository has the code and eight trained models behind the paper *Augmentation and Cutout in Deepfake Detection: A Comparative Study of Accuracy, Calibration, and Attention* (UBMK 2026) and the MSc thesis it comes from.
 
-## Quick start
-
-Python 3.10 to 3.12.
+## Try it
 
 ```bash
 pip install git+https://github.com/mertkayacs/xdfdet
 xdfdet predict video.mp4 --gradcam cam.png
 ```
 
-Output for a clip of the portrait above (a real person):
+You get the probability that the video is real, a verdict, and a heat map saved as `cam.png`. No dataset needed: the detector downloads itself the first time. Python 3.10 to 3.12.
+
+<details>
+<summary>Example output, Python usage and Colab</summary>
+
+For a clip of the portrait above (a real person):
 
 ```json
 {
@@ -42,9 +45,7 @@ Output for a clip of the portrait above (a real person):
 }
 ```
 
-The model downloads from Hugging Face on first use. `predict` finds the face, samples 12 frames, averages the per-frame scores and writes a Grad-CAM overlay with the mean activation (0 to 100) per face region. Choose another model with `--model`, for example `--model baseline`.
-
-From Python:
+`regions` is the mean heat-map activation (0 to 100) inside each face region. Choose another detector with `--model`, for example `--model baseline`.
 
 ```python
 import xdfdet
@@ -53,35 +54,67 @@ model = xdfdet.load_model("aug-cutout-black")   # Keras model, input (batch, 12,
 
 Or open [`notebooks/quickstart.ipynb`](notebooks/quickstart.ipynb) in Colab.
 
-## How it works
+</details>
 
-Every image in this section except the FaceForensics++ frames is produced by [`scripts/make_figures.py`](scripts/make_figures.py), which runs the package's own functions on a public-domain portrait from scikit-image.
+## What we did
 
-**1. Find the face.** MTCNN finds the face in each frame, levels the eyes and crops the face to 224×224 pixels. Each video keeps 32 frames, and the model sees 12 of them.
+**1. Collect faces.** We took 1,000 real videos and a fake version of each, and cropped out the faces.
 
-<img src="docs/figures/detect.webp" width="220" alt="Detected face and eye points"> <img src="docs/figures/crop.webp" width="220" alt="Aligned face crop">
+<img src="docs/figures/thesis-ssim-real.webp" width="200" alt="Real frame"> <img src="docs/figures/thesis-ssim-fake.webp" width="200" alt="Fake frame">
 
-**2. Map the face.** dlib places 68 landmarks. They define the eight regions used in the analysis: jaw, both eyebrows, both eyes, nose, outer mouth and inner mouth. The right image shows the masks exactly as they are scored. The jaw polygon closes across the lower face, so the jaw score also covers the cheeks, nose and mouth.
+<sub>Real and fake frame from FaceForensics++ (from the thesis). Four manipulation methods: FaceSwap, Face2Face, FaceShifter, Deepfakes.</sub>
 
-<img src="docs/figures/landmarks.webp" width="220" alt="68 landmarks and region outlines"> <img src="docs/figures/regions.webp" width="220" alt="Region masks as scored">
+**2. Train it nine ways.** We trained the same detector nine times. Each time we changed how the training faces were altered: small random edits, a patch over part of the fake face, both, or neither.
 
-**3. Compare real and fake.** SSIM compares a real frame with its fake version (FaceForensics++, from the thesis). Bright areas differ, dark areas look almost identical. Cutout aims at the dark areas, where the fake already passes for real.
+<img src="docs/figures/aug-standard.webp" width="200" alt="Random edits"> <img src="docs/figures/cutout-black.webp" width="200" alt="Patch on a fake face">
 
-<img src="docs/figures/thesis-ssim-real.webp" width="180" alt="Real frame"> <img src="docs/figures/thesis-ssim-map.webp" width="180" alt="SSIM difference map"> <img src="docs/figures/thesis-ssim-fake.webp" width="180" alt="Fake frame">
+<sub>Left: random edits (augmentation). Right: a patch over the part of a fake face that already looks real (cutout).</sub>
 
-**4. Blank out a region.** A landmark polygon covering 2 to 5 percent of the frame is blanked on the fake frames with black, white or random pixels. Real frames get a small star-shaped cutout, so a blank patch alone never gives the answer away.
+**3. Ask it why.** For every video, a heat map shows which part of the face drove the decision. We measured it in eight regions: eyes, eyebrows, nose, mouth and jaw.
 
-<img src="docs/figures/cutout-black.webp" width="160" alt="Black fill"> <img src="docs/figures/cutout-white.webp" width="160" alt="White fill"> <img src="docs/figures/cutout-random.webp" width="160" alt="Random fill"> <img src="docs/figures/star.webp" width="160" alt="Star cutout on a real frame">
+<img src="docs/figures/gradcam-aug-cutout-black.webp" width="200" alt="Heat map"> <img src="docs/figures/regions.webp" width="200" alt="Eight face regions">
 
-**5. Augment.** Albumentations adds noise, blur, slight color shifts, flips and small rotations. The intense setting applies them four to five times as often as the standard one. Below: the input, one standard draw and one intense draw.
+<sub>Grad-CAM heat map and the eight region masks, drawn from 68 facial landmarks.</sub>
 
-<img src="docs/figures/crop.webp" width="180" alt="Input"> <img src="docs/figures/aug-standard.webp" width="180" alt="Standard augmentation"> <img src="docs/figures/aug-intense.webp" width="180" alt="Intense augmentation">
+<details>
+<summary><b>The full pipeline, step by step</b></summary>
 
-**6. Score the video.** EfficientNet-B4 rates each of the 12 frames on its own, and the video score is the mean. Training uses binary cross-entropy on that mean, so the loss matches how the model is used. A score below 0.5 means fake.
+Every image here except the FaceForensics++ frames is produced by [`scripts/make_figures.py`](scripts/make_figures.py), which runs the package's own functions on a public-domain portrait from scikit-image.
 
-**7. Explain the decision.** Grad-CAM is computed on frames 0, 4 and 7, averaged, and measured inside each region. [`xdfdet analyze`](#reproduce) reports this per outcome (true and false positives and negatives).
+**Find the face.** MTCNN finds the face in each frame, levels the eyes and crops the face to 224×224 pixels. Each video keeps 32 frames, and the model sees 12 of them.
 
-## Results
+<img src="docs/figures/detect.webp" width="200" alt="Detected face and eye points"> <img src="docs/figures/crop.webp" width="200" alt="Aligned face crop">
+
+**Map the face.** dlib places 68 landmarks that define the eight regions. The right image shows the masks exactly as scored; the jaw polygon closes across the lower face, so the jaw score also covers the cheeks, nose and mouth.
+
+<img src="docs/figures/landmarks.webp" width="200" alt="68 landmarks"> <img src="docs/figures/regions.webp" width="200" alt="Region masks">
+
+**Compare real and fake.** SSIM compares a real frame with its fake. Bright areas differ, dark areas look almost the same. Cutout aims at the dark areas, where the fake already passes for real.
+
+<img src="docs/figures/thesis-ssim-real.webp" width="160" alt="Real frame"> <img src="docs/figures/thesis-ssim-map.webp" width="160" alt="SSIM difference map"> <img src="docs/figures/thesis-ssim-fake.webp" width="160" alt="Fake frame">
+
+**Blank out a region.** A landmark polygon covering 2 to 5 percent of the frame is blanked on the fake frames with black, white or random pixels. Real frames get a small star-shaped cutout, so a blank patch alone never gives the answer away.
+
+<img src="docs/figures/cutout-black.webp" width="150" alt="Black fill"> <img src="docs/figures/cutout-white.webp" width="150" alt="White fill"> <img src="docs/figures/cutout-random.webp" width="150" alt="Random fill"> <img src="docs/figures/star.webp" width="150" alt="Star cutout">
+
+**Augment.** Albumentations adds noise, blur, slight color shifts, flips and small rotations. The intense setting applies them four to five times as often as the standard one. Below: input, one standard draw, one intense draw.
+
+<img src="docs/figures/crop.webp" width="160" alt="Input"> <img src="docs/figures/aug-standard.webp" width="160" alt="Standard"> <img src="docs/figures/aug-intense.webp" width="160" alt="Intense">
+
+**Score the video.** EfficientNet-B4 rates each of the 12 frames on its own, and the video score is the mean. Training uses binary cross-entropy on that mean. Below 0.5 means fake.
+
+**Explain the decision.** Grad-CAM is computed on frames 0, 4 and 7, averaged, and measured inside each region. `xdfdet analyze` reports this per outcome (true and false positives and negatives).
+
+</details>
+
+## What we found
+
+1. **Covering part of the fake face helps.** The best detector combined random edits with a black patch. It beat the plain detector on all four scores (AUC 0.8971 against 0.8678).
+2. **Different scores, different rankings.** Standard augmentation comes last on AUC and second on F1. Judging a detector by one number hides this.
+3. **The nose is a weak spot.** Detectors lean heavily on the nose, whether their answer is right or wrong.
+
+<details>
+<summary><b>Full results table</b></summary>
 
 AUC, F1, Brier and LogLoss on the FaceForensics++ test split. **Paper** is the mean ± std over three runs (Table II). **Released** is the single run whose weights are published, measured in its original notebook.
 
@@ -97,15 +130,9 @@ AUC, F1, Brier and LogLoss on the FaceForensics++ test split. **Paper** is the m
 | `aug-cutout-black` | **0.8971 ± 0.0064** | **0.8429 ± 0.0101** | **0.1242 ± 0.0009** | 0.4710 ± 0.0063 | 0.8981 | 0.8431 | 0.1247 | 0.4710 |
 | `aug-cutout-white` | 0.8734 ± 0.0061 | 0.7951 ± 0.0095 | 0.1455 ± 0.0012 | 0.4761 ± 0.0071 | 0.8734 | 0.7883 | 0.1451 | 0.4761 |
 
-What the paper found:
+The nine settings:
 
-- **Augmentation plus a black-filled cutout** gives the best AUC, F1 and Brier score. Standard augmentation on its own falls below the baseline on AUC.
-- **The metrics disagree.** `aug-standard` is last on AUC and second on F1, and the random-fill model has the lowest LogLoss. Judging a detector by one number hides this.
-- **The nose is a weak spot.** In the region analysis the nose stays among the most active regions in correct decisions and in errors alike.
-
-## The nine settings
-
-| Augmentation ↓ · Cutout → | none | random fill | black fill | white fill |
+| Random edits ↓ · Patch → | none | random fill | black fill | white fill |
 |---|---|---|---|---|
 | none | `baseline` | | | |
 | flips only | | `cutout-random` | `cutout-black` | `cutout-white` |
@@ -114,11 +141,16 @@ What the paper found:
 
 Data, model, optimizer and training schedule are the same in every setting. The exact probabilities are in [`src/xdfdet/config.py`](src/xdfdet/config.py).
 
-## Reproduce
+</details>
 
-Scoring a video needs no dataset. Training and the tables need FaceForensics++ from [its authors](https://github.com/ondyari/FaceForensics) (research use only) and a GPU; a Colab T4 is enough.
+## Reproduce the study
 
-1. Put the raw videos in one folder: real clips as `000.mp4, 001.mp4, ...`, fakes as `<Manipulation>/000_003.mp4`. We used FaceSwap, Face2Face, FaceShifter and Deepfakes.
+Training and the full tables need FaceForensics++ from [its authors](https://github.com/ondyari/FaceForensics) (research use only) and a GPU; a Colab T4 is enough.
+
+<details>
+<summary><b>Step by step</b></summary>
+
+1. Put the raw videos in one folder: real clips as `000.mp4, 001.mp4, ...`, fakes as `<Manipulation>/000_003.mp4`.
 2. Crop the faces (MTCNN, eye-aligned, 32 frames, 224×224):
    ```bash
    xdfdet crop raw/ faces/
@@ -133,21 +165,26 @@ Scoring a video needs no dataset. Training and the tables need FaceForensics++ f
    xdfdet analyze  --data faces/ --model aug-cutout-black.keras --out regions.json
    ```
 
-`analyze` reports, for each outcome (TP, TN, FP, FN, with fake as the positive class), the mean and spread of Grad-CAM activation in the eight regions.
+`analyze` reports, for each outcome (TP, TN, FP, FN, with fake as the positive class), the mean and spread of heat-map activation in the eight regions.
 
 Tests run on a CPU without the dataset: `pip install -e ".[test]" && pytest`. To redraw the figures: `python scripts/make_figures.py docs/figures`.
 
+</details>
+
 ## Models
 
-Eight models are on [Hugging Face](https://huggingface.co/mertkayacs/xdfdet) under CC BY-NC 4.0, one `.keras` file per setting, named as in the tables above. `xdfdet.load_model(name)` downloads and loads one. The ninth, `aug-intense`, was lost (see the notes below).
+Eight detectors are on [Hugging Face](https://huggingface.co/mertkayacs/xdfdet), one `.keras` file per setting, named as in the tables. `xdfdet.load_model(name)` downloads and loads one. A ninth, `aug-intense`, was lost.
 
 ## Notes on the original runs
 
-This code was rebuilt from the Colab notebooks behind the paper and checked against them. Reading those notebooks surfaced details the paper does not state. They are listed here so the published numbers can be read correctly.
+The code was rebuilt from the Colab notebooks behind the paper and checked against them. Reading those notebooks surfaced details the paper does not state.
+
+<details>
+<summary><b>Read these before comparing numbers</b></summary>
 
 - **Splits.** Each notebook drew its own random 70/15/15 split with no fixed seed, so every configuration was tested on a different set of 150 pairs. A published checkpoint may have trained on videos that sit in another configuration's test set, so re-scoring the checkpoints on one common split would mix training and test data. This code seeds the split (`--seed 42`), so new runs are comparable.
 - **Dropout.** The paper gives 0.55 for every model. The released `aug-cutout-random` checkpoint was trained with 0.25. Dropout is off at inference, so this affects how the model was trained and not how you use it.
-- **Cutout-only models** kept Albumentations' `HorizontalFlip` at its default probability of 0.5, so they saw random flips.
+- **Patch-only models** kept Albumentations' `HorizontalFlip` at its default probability of 0.5, so they saw random flips.
 - **Missing checkpoint.** The `aug-standard` and `aug-intense` runs saved to the same file name, and the later save overwrote `aug-intense`. Its row comes from the paper; there are no weights for it.
 - **Jaw region.** The region masks are the landmark polygons filled as drawn. The jaw polygon (points 0 to 16) closes across the lower face, so its score overlaps the nose and mouth regions.
 - **Precision.** Training and the reported scores ran in mixed float16 on a T4 GPU. The released files are float32 copies with identical weights, and scores can differ from the float16 runs, most near the 0.5 boundary. `conversion.json` on Hugging Face lists both for two test images. To score in the original precision on a GPU, use `xdfdet evaluate --mixed-precision` or `xdfdet.load_model(name, mixed_precision=True)`.
@@ -157,6 +194,8 @@ This code was rebuilt from the Colab notebooks behind the paper and checked agai
 - **Crop margin.** The thesis says faces were cropped "with a fixed margin" without giving a value. `xdfdet crop` uses 30% of the face box.
 
 [`scripts/convert_checkpoints.py`](scripts/convert_checkpoints.py) shows how each Colab checkpoint was matched to its configuration and converted.
+
+</details>
 
 ## Citation
 
@@ -182,4 +221,4 @@ This code was rebuilt from the Colab notebooks behind the paper and checked agai
 
 ## License
 
-Code: GPL-3.0 (see `LICENSE`). Model weights: CC BY-NC 4.0, because they were trained on FaceForensics++, which is licensed for non-commercial research only. The FaceForensics++ frames in `docs/figures/thesis-*` come from the thesis (CC BY 4.0). The portrait is a public-domain NASA photo that ships with scikit-image.
+Code: MIT (see [`LICENSE`](LICENSE)). Model weights: CC BY-NC 4.0, because they were trained on FaceForensics++, which is licensed for non-commercial research only. The FaceForensics++ frames in `docs/figures/thesis-*` come from the thesis (CC BY 4.0). The portrait is a public-domain NASA photo that ships with scikit-image.

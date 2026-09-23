@@ -7,7 +7,7 @@ name = "xdfdet"
 version = "1.0.0"
 description = "Frame-level deepfake detection with Grad-CAM region analysis (EfficientNet-B4, FaceForensics++)"
 readme = "README.md"
-license = "GPL-3.0-or-later"
+license = "MIT"
 authors = [{ name = "Mert Kaya" }]
 requires-python = ">=3.10,<3.13"
 # Pinned to the versions the released models were trained with (Colab, August 2025).
