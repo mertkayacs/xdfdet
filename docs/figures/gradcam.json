@@ -1,54 +1,54 @@
 {
   "baseline": {
-    "real_probability": 0.9989,
+    "real_probability": 0.9947,
     "regions": {
-      "jaw": 25.7,
-      "left_eyebrow": 15.2,
-      "right_eyebrow": 26.2,
-      "nose": 21.9,
-      "left_eye": 12.7,
-      "right_eye": 20.4,
-      "outer_mouth": 25.5,
-      "inner_mouth": 25.7
+      "jaw": 44.3,
+      "left_eyebrow": 37.6,
+      "right_eyebrow": 38.2,
+      "nose": 43.4,
+      "left_eye": 33.9,
+      "right_eye": 41.2,
+      "outer_mouth": 47.0,
+      "inner_mouth": 46.9
     }
   },
   "aug-standard": {
     "real_probability": 0.9999,
     "regions": {
-      "jaw": 77.9,
-      "left_eyebrow": 69.5,
-      "right_eyebrow": 59.3,
-      "nose": 91.1,
-      "left_eye": 80.7,
-      "right_eye": 69.5,
-      "outer_mouth": 83.9,
-      "inner_mouth": 84.5
+      "jaw": 62.1,
+      "left_eyebrow": 84.1,
+      "right_eyebrow": 73.9,
+      "nose": 75.3,
+      "left_eye": 84.1,
+      "right_eye": 77.7,
+      "outer_mouth": 55.0,
+      "inner_mouth": 55.9
     }
   },
   "cutout-black": {
-    "real_probability": 0.9978,
+    "real_probability": 0.7315,
     "regions": {
-      "jaw": 44.9,
-      "left_eyebrow": 39.9,
-      "right_eyebrow": 23.4,
-      "nose": 72.3,
-      "left_eye": 60.3,
-      "right_eye": 29.6,
-      "outer_mouth": 58.1,
-      "inner_mouth": 61.5
+      "jaw": 1.0,
+      "left_eyebrow": 6.0,
+      "right_eyebrow": 0.0,
+      "nose": 0.9,
+      "left_eye": 7.3,
+      "right_eye": 0.0,
+      "outer_mouth": 0.0,
+      "inner_mouth": 0.0
     }
   },
   "aug-cutout-black": {
-    "real_probability": 0.9997,
+    "real_probability": 0.9999,
     "regions": {
-      "jaw": 43.6,
-      "left_eyebrow": 64.3,
-      "right_eyebrow": 45.0,
-      "nose": 61.0,
-      "left_eye": 79.5,
-      "right_eye": 63.1,
-      "outer_mouth": 37.9,
-      "inner_mouth": 36.7
+      "jaw": 55.2,
+      "left_eyebrow": 74.4,
+      "right_eyebrow": 55.0,
+      "nose": 66.5,
+      "left_eye": 79.2,
+      "right_eye": 62.4,
+      "outer_mouth": 47.6,
+      "inner_mouth": 48.6
     }
   }
 }

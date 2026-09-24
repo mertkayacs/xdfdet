@@ -13,9 +13,9 @@
   </tr>
 </table>
 
-*Grad-CAM of four configurations on the same real, public-domain portrait. All four classify it as real, yet their activation maps differ: the baseline is weak and partly off the face, the best configuration concentrates on the eyes and eyebrows.*
+*Grad-CAM of four setups on the same real portrait. All four call it real, but they look at different places: the best setup focuses on the eyes and eyebrows, and black-fill cutout alone barely activates.*
 
-This repository contains the code and eight trained models for the paper *Augmentation and Cutout in Deepfake Detection: A Comparative Study of Accuracy, Calibration, and Attention* (UBMK 2026) and the MSc thesis it comes from.
+Code and eight trained models for the paper *Augmentation and Cutout in Deepfake Detection: A Comparative Study of Accuracy, Calibration, and Attention* (UBMK 2026) and the MSc thesis behind it, by Mert Kaya at TED University. Thesis advisor: Venera Adanova.
 
 ## Usage
 
@@ -29,17 +29,17 @@ The command returns the probability that the video is real, the verdict, and a G
 <details>
 <summary>Example output, Python usage and Colab</summary>
 
-For a clip of the portrait above (a real person):
+For a 3-second clip of the portrait above (a real person):
 
 ```json
 {
   "video": "portrait.mp4",
   "model": "aug-cutout-black",
-  "real_probability": 0.9996,
+  "real_probability": 0.9999,
   "verdict": "real",
   "regions": {
-    "jaw": 42.4, "left_eyebrow": 62.7, "right_eyebrow": 42.7, "nose": 62.8,
-    "left_eye": 81.4, "right_eye": 57.2, "outer_mouth": 37.8, "inner_mouth": 37.3
+    "jaw": 53.2, "left_eyebrow": 73.5, "right_eyebrow": 47.1, "nose": 65.7,
+    "left_eye": 77.3, "right_eye": 58.0, "outer_mouth": 46.8, "inner_mouth": 47.5
   },
   "gradcam": "cam.png"
 }
@@ -58,19 +58,19 @@ Or open [`notebooks/quickstart.ipynb`](notebooks/quickstart.ipynb) in Colab.
 
 ## Method
 
-**1. Data and face extraction.** 1,000 real videos from FaceForensics++ are paired with one manipulated version each, and the faces are detected, aligned and cropped.
+**1. Faces from 2,000 videos.** 1,000 real FaceForensics++ videos, each paired with one manipulated copy. Every face is found, aligned and cropped.
 
 <img src="docs/figures/thesis-ssim-real.webp" width="200" alt="Real frame"> <img src="docs/figures/thesis-ssim-fake.webp" width="200" alt="Manipulated frame">
 
 <sub>Real and manipulated frame from FaceForensics++ (from the thesis). Four manipulation methods in rotation: FaceSwap, Face2Face, FaceShifter, Deepfakes. MTCNN detection with eye alignment, 12 frames per model input.</sub>
 
-**2. Nine training configurations.** One EfficientNet-B4 detector is trained under nine configurations that vary data augmentation and cutout. Cutout removes a facial region from the **fake frames only**; real frames receive a small star-shaped cutout instead.
+**2. Nine training setups.** One EfficientNet-B4 is trained nine times. Only data augmentation and cutout change. Cutout blanks a face region on **fake frames only**; real frames get a small star-shaped blank with the same fill.
 
 <img src="docs/figures/cutout-black.webp" width="200" alt="Cutout on a fake frame"> <img src="docs/figures/star.webp" width="200" alt="Star cutout on a real frame">
 
-<sub>Left: cutout on a fake frame. Right: star cutout on a real frame. Cutout follows the winning solution of the Deepfake Detection Challenge ([Seferbekov, 2020](https://github.com/selimsef/dfdc_deepfake_challenge)), which dropped artefacts and face regions from training images to improve generalization. An SSIM map locates where the fake is most similar to its real source, and a landmark polygon over that area is filled with black, white or random pixels. The star on real frames uses the same fill, so a blank region alone never identifies a fake and the model does not overfit to pristine facial detail.</sub>
+<sub>Cutout on a fake frame and the star on a real frame. The idea comes from the winning Deepfake Detection Challenge solution ([Seferbekov, 2020](https://github.com/selimsef/dfdc_deepfake_challenge)). An SSIM map finds where the fake most resembles its real source, and that region is filled with black, white or random pixels. Because real frames carry the same kind of blank, a blank patch alone never means fake, and the model has to use the whole face.</sub>
 
-**3. Explainability analysis.** Grad-CAM maps are averaged over frames and measured in eight facial regions defined by 68 landmarks, separately for correct and incorrect predictions.
+**3. Explaining each decision.** Grad-CAM shows which pixels drove a prediction. It is averaged over frames and measured in eight face regions from 68 landmarks, separately for right and wrong predictions.
 
 <img src="docs/figures/gradcam-aug-cutout-black.webp" width="200" alt="Grad-CAM activation"> <img src="docs/figures/regions.webp" width="200" alt="Eight facial regions">
 
@@ -79,7 +79,7 @@ Or open [`notebooks/quickstart.ipynb`](notebooks/quickstart.ipynb) in Colab.
 <details>
 <summary><b>Full pipeline</b></summary>
 
-Every image here except the FaceForensics++ frames is produced by [`scripts/make_figures.py`](scripts/make_figures.py), which runs the package's own functions on a public-domain portrait from scikit-image.
+Every image here except the FaceForensics++ frames is produced by [`scripts/make_figures.py`](scripts/make_figures.py), which runs the package's own functions on a [Pexels portrait](https://www.pexels.com/photo/close-photo-of-a-woman-in-hoodie-sweater-10349430/).
 
 **Face detection.** MTCNN detects the face in every frame, aligns it by the eye positions and crops it to 224×224 pixels. Each video keeps 32 frames, of which the model receives 12.
 
@@ -109,9 +109,9 @@ Every image here except the FaceForensics++ frames is produced by [`scripts/make
 
 ## Results
 
-1. **Augmentation with black-fill cutout performs best.** It achieves the highest AUC (0.8971 against 0.8678 for the baseline) and the best F1 and Brier scores, and it improves on the baseline in all four metrics.
-2. **Metrics rank configurations differently.** Standard augmentation ranks last on AUC but second on F1, and the random-fill configuration has the lowest LogLoss. Evaluating a detector on a single metric hides these differences.
-3. **The nose is a persistent weak point.** In the thesis region analysis the nose remains among the most active regions in both correct and incorrect decisions.
+1. **Augmentation plus black-fill cutout wins.** Highest AUC (0.8971 against 0.8678 for the baseline), best F1 and best Brier score, and better than the baseline on all four metrics.
+2. **Metrics disagree.** Standard augmentation is last on AUC and second on F1; random-fill cutout has the lowest LogLoss. One number hides this.
+3. **The nose stays in focus.** In the thesis region analysis the nose is among the most active regions in both right and wrong decisions.
 
 <details>
 <summary><b>Full results table</b></summary>
@@ -140,6 +140,24 @@ The nine settings:
 | intense | `aug-intense` | | | |
 
 Data, model, optimizer and training schedule are the same in every setting. The exact probabilities are in [`src/xdfdet/config.py`](src/xdfdet/config.py).
+
+</details>
+
+## Beyond the paper
+
+Two checks show the limits of a single-benchmark detector.
+
+- **Unseen data.** On 398 labelled [DFDC](https://www.kaggle.com/competitions/deepfake-detection-challenge) videos the eight models reach AUC 0.60 to 0.66, against 0.86 to 0.90 on FaceForensics++, and catch 15% to 36% of the fakes. The best in-domain setup becomes the most overconfident one. Full run: [Kaggle notebook](https://www.kaggle.com/code/mertilovski/xdfdet-on-dfdc).
+- **Out-of-domain photos.** On six sharp photos of real people the baseline's scores range from 0.00 to 0.99.
+
+We are working on a proposed ensemble built on three techniques and developing it into a product; parts of it will be open-sourced.
+
+<details>
+<summary><b>The three techniques and why detectors need them</b></summary>
+
+- **An ensemble of detectors.** Several detectors trained on different datasets and manipulation methods vote on each video, so one model's blind spot is less likely to decide the verdict.
+- **Calibrated confidence.** Scores are recalibrated on held-out videos and the ensemble reports its uncertainty when models disagree. People can act on a 95% score and double-check a 60% one.
+- **Explanations by default.** Grad-CAM maps and region scores come with every verdict, so a reviewer can check whether it rests on a plausible artefact.
 
 </details>
 
@@ -221,4 +239,4 @@ The code was rebuilt from the Colab notebooks behind the paper and checked again
 
 ## License
 
-Code: MIT (see [`LICENSE`](LICENSE)). Model weights: CC BY-NC 4.0, because they were trained on FaceForensics++, which is licensed for non-commercial research only. The FaceForensics++ frames in `docs/figures/thesis-*` come from the thesis (CC BY 4.0). The portrait is a public-domain NASA photo that ships with scikit-image.
+Code: MIT (see [`LICENSE`](LICENSE)). Model weights: CC BY-NC 4.0, because they were trained on FaceForensics++, which is licensed for non-commercial research only. The FaceForensics++ frames in `docs/figures/thesis-*` come from the thesis (CC BY 4.0). The portrait is a [Pexels photo](https://www.pexels.com/photo/close-photo-of-a-woman-in-hoodie-sweater-10349430/) (Pexels license).

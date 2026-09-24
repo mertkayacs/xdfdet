@@ -1,9 +1,12 @@
 """Render the method figures used in the README, the model card and the project site.
 
-Every step runs the package's own code on a public-domain NASA portrait that ships
-with scikit-image, so the figures can be regenerated without FaceForensics++.
+Every step runs the package's own code on one portrait, so the figures can be
+regenerated without FaceForensics++. The figures in docs/figures use a Pexels photo
+(https://www.pexels.com/photo/close-photo-of-a-woman-in-hoodie-sweater-10349430/,
+Pexels license). Without a path the script uses the public-domain NASA portrait
+that ships with scikit-image.
 
-    python scripts/make_figures.py docs/figures
+    python scripts/make_figures.py docs/figures [portrait.jpg]
 """
 
 import json
@@ -41,9 +44,12 @@ def aligned_crop(frame, box, kp, size, margin=0.3):
     return _align_and_crop(frame, box, kp["left_eye"], kp["right_eye"], size, margin)
 
 
-def main(out):
+def main(out, portrait=None):
     out.mkdir(parents=True, exist_ok=True)
-    frame = np.ascontiguousarray(data.astronaut())
+    if portrait:
+        frame = cv2.cvtColor(cv2.imread(str(portrait)), cv2.COLOR_BGR2RGB)
+    else:
+        frame = np.ascontiguousarray(data.astronaut())
     box, kp = detect(frame)
 
     # 1. Detection on the full frame, then the eye-aligned crop.
@@ -116,4 +122,4 @@ def main(out):
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]))
+    main(Path(sys.argv[1]), sys.argv[2] if len(sys.argv) > 2 else None)
