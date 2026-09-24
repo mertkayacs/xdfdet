@@ -4,7 +4,7 @@
 
 [Project page](https://xdfdet.mertkayacs.com) ([Türkçe](https://xdfdet.mertkayacs.com/tr/), [Deutsch](https://xdfdet.mertkayacs.com/de/)) · [Models on Hugging Face](https://huggingface.co/mertkayacs/xdfdet) · [Kaggle](https://www.kaggle.com/models/mertilovski/xdfdet) · [Thesis](https://doi.org/10.5281/zenodo.18998566)
 
-<img src="docs/figures/strip-gradcam.webp" alt="Grad-CAM of four setups on the same real portrait">
+<img width="520" src="docs/figures/strip-gradcam.webp" alt="Grad-CAM of four setups on the same real portrait">
 
 *Grad-CAM of four setups on the same real portrait. All four call it real, but they look at different places: the best setup focuses on the eyes and eyebrows, and black-fill cutout alone barely activates.*
 
@@ -53,19 +53,19 @@ Or open [`notebooks/quickstart.ipynb`](notebooks/quickstart.ipynb) in Colab.
 
 **1. Faces from 2,000 videos.** 1,000 real FaceForensics++ videos, each paired with one manipulated copy. Every face is found, aligned and cropped.
 
-<img src="docs/figures/pair-data.webp" alt="Real and manipulated frame">
+<img width="620" src="docs/figures/pair-data.webp" alt="Real and manipulated frame">
 
 Real and manipulated frame from FaceForensics++ (from the thesis). Four manipulation methods in rotation: FaceSwap, Face2Face, FaceShifter, Deepfakes. MTCNN detection with eye alignment, 12 frames per model input.
 
 **2. Nine training setups.** One EfficientNet-B4 is trained nine times. Only data augmentation and cutout change. Cutout blanks a face region on **fake frames only**; real frames get a small star-shaped blank with the same fill.
 
-<img src="docs/figures/pair-cutout.webp" alt="Cutout on a fake frame and the star on a real frame">
+<img width="620" src="docs/figures/pair-cutout.webp" alt="Cutout on a fake frame and the star on a real frame">
 
 Cutout on a fake frame and the star on a real frame. The idea comes from the winning Deepfake Detection Challenge solution ([Seferbekov, 2020](https://github.com/selimsef/dfdc_deepfake_challenge)). An SSIM map finds where the fake most resembles its real source, and that region is filled with black, white or random pixels. Because real frames carry the same kind of blank, a blank patch alone never means fake, and the model has to use the whole face.
 
 **3. Explaining each decision.** Grad-CAM shows which pixels drove a prediction. It is averaged over frames and measured in eight face regions from 68 landmarks, separately for right and wrong predictions.
 
-<img src="docs/figures/pair-explain.webp" alt="Grad-CAM of the best setup and the eight region masks">
+<img width="620" src="docs/figures/pair-explain.webp" alt="Grad-CAM of the best setup and the eight region masks">
 
 Grad-CAM of the best configuration and the eight region masks.
 
@@ -76,23 +76,23 @@ Every image here except the FaceForensics++ frames is produced by [`scripts/make
 
 **Face detection.** MTCNN detects the face in every frame, aligns it by the eye positions and crops it to 224×224 pixels. Each video keeps 32 frames, of which the model receives 12.
 
-<img src="docs/figures/pipe-detect.webp" alt="Detected face and aligned crop">
+<img width="620" src="docs/figures/pipe-detect.webp" alt="Detected face and aligned crop">
 
 **Facial landmarks.** dlib places 68 landmarks that define the eight regions. The right image shows the masks exactly as scored; the jaw polygon closes across the lower face, so the jaw score also covers the cheeks, nose and mouth.
 
-<img src="docs/figures/pipe-landmarks.webp" alt="Landmarks and region masks">
+<img width="620" src="docs/figures/pipe-landmarks.webp" alt="Landmarks and region masks">
 
 **SSIM difference map.** SSIM compares each fake frame with its real source. Bright areas differ; dark areas are nearly identical. The dark areas are where the fake already resembles the real face, and cutout targets them.
 
-<img src="docs/figures/pipe-ssim.webp" alt="Real frame, SSIM difference, manipulated frame">
+<img width="680" src="docs/figures/pipe-ssim.webp" alt="Real frame, SSIM difference, manipulated frame">
 
 **Cutout.** Applied to the fake frames only: a landmark polygon covering 2 to 5 percent of the frame, over the area SSIM marks as most similar, is filled with black, white or random pixels. Real frames receive a star-shaped cutout with an outer radius of 8 to 16 pixels and the same fill, each with probability 0.5.
 
-<img src="docs/figures/pipe-cutout.webp" alt="Black, white and random fill, and the star">
+<img width="520" src="docs/figures/pipe-cutout.webp" alt="Black, white and random fill, and the star">
 
 **Data augmentation.** Albumentations adds noise, blur, slight color shifts, flips and small rotations. The intense setting applies them four to five times as often as the standard one.
 
-<img src="docs/figures/pipe-augment.webp" alt="Input, standard and intense augmentation">
+<img width="680" src="docs/figures/pipe-augment.webp" alt="Input, standard and intense augmentation">
 
 **Video-level prediction.** EfficientNet-B4 scores each of the 12 frames independently. The video score is the mean of the frame scores, and binary cross-entropy is computed on that mean. Scores below 0.5 are classified as fake.
 
