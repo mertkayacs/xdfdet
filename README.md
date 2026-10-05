@@ -2,6 +2,8 @@
 
 **Where does a deepfake detector look?** This project studies how training-time preprocessing shapes an EfficientNet-B4 deepfake detector: its accuracy, its calibration, and the facial regions its decisions rely on, measured with Grad-CAM.
 
+**Explainable deepfake detection from senior AI engineer Mert Kaya's research, accepted at UBMK 2026 (IEEE):** eight trained EfficientNet-B4 detectors with Grad-CAM region analysis ([results](#results)).
+
 [Project page](https://xdfdet.mertkayacs.com) ([Türkçe](https://xdfdet.mertkayacs.com/tr/), [Deutsch](https://xdfdet.mertkayacs.com/de/)) · [Models on Hugging Face](https://huggingface.co/mertkayacs/xdfdet) · [Kaggle](https://www.kaggle.com/models/mertilovski/xdfdet) · [Thesis](https://doi.org/10.5281/zenodo.18998566) · Games: [Real or AI?](https://xdfdet.mertkayacs.com/game/), [Estimate](https://xdfdet.mertkayacs.com/estimate/)
 
 <img width="520" src="docs/figures/strip-gradcam.webp" alt="Grad-CAM of four setups on the same real portrait">
@@ -233,3 +235,7 @@ The code was rebuilt from the Colab notebooks behind the paper and checked again
 ## License
 
 Code: MIT (see [`LICENSE`](LICENSE)). Model weights: CC BY-NC 4.0, because they were trained on FaceForensics++, which is licensed for non-commercial research only. The FaceForensics++ frames in `docs/figures/thesis-*` come from the thesis (CC BY 4.0). The portrait is a [Pexels photo](https://www.pexels.com/photo/close-photo-of-a-woman-in-hoodie-sweater-10349430/) (Pexels license).
+
+<a href="https://eschatialabs.com"><img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/assets/eschatia-labs.png" width="160" alt="Eschatia Labs"></a>
+
+[An Eschatia Labs project](https://eschatialabs.com). [Built by Mert Kaya](https://mertkayacs.com).
