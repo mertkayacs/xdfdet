@@ -2,6 +2,8 @@
 
 xdfdet checks whether a face video is real or manipulated and produces a heatmap of the regions behind its prediction. The study asks how training choices change both detection quality and the evidence a reviewer can inspect.
 
+<img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/strip-gradcam.webp" width="520" alt="Grad-CAM heatmaps of four training setups on the same real portrait: baseline, augmentation, cutout, and augmentation with cutout, the best setup">
+
 [Read the study](https://xdfdet.mertkayacs.com) or try one of the eight released detectors below.
 
 ## Run a detector
@@ -19,6 +21,12 @@ Use the [quickstart notebook](notebooks/quickstart.ipynb) for Python and Colab e
 ## Study and results
 
 Nine training configurations vary image augmentation and cutout, which masks part of a face during training. The data is a paired subset of FaceForensics++, a widely used dataset of real and manipulated face videos. Each prediction averages frame scores; Grad-CAM attention is measured in eight facial regions.
+
+<img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/pair-data.webp" width="620" alt="A real FaceForensics++ video frame next to its manipulated version">
+
+<img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/pair-cutout.webp" width="620" alt="Training-time cutout: a black-filled region on a fake frame and a small star-shaped patch on a real frame">
+
+<img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/pair-explain.webp" width="620" alt="Grad-CAM heatmap of the best setup next to the eight facial regions used to measure attention">
 
 In the paper, augmentation with black-fill cutout reached **0.8971 AUC**, compared with **0.8678 for the baseline EfficientNet-B4**. AUC measures how well a detector ranks real and fake videos; higher is better. These are means over three runs. The released checkpoint's AUC is **0.8981**, a separate single-run result.
 
@@ -141,4 +149,4 @@ The FaceForensics++ frames in `docs/figures/thesis-*` come from the thesis (CC B
 
 This code accompanies Mert Kaya and Venera Adanova's UBMK 2026 paper, accepted and to appear in IEEE Xplore, and Mert Kaya's [MSc thesis](https://doi.org/10.5281/zenodo.18998566) at TED University. No paper DOI is available yet.
 
-An [Eschatia Labs](https://eschatialabs.com) project by [Mert Kaya](https://mertkayacs.com).
+<a href="https://eschatialabs.com"><picture><source media="(min-resolution: 2dppx)" srcset="https://eschatialabs.com/brand/lockup-46@2x.png"><img src="https://eschatialabs.com/brand/lockup-46@1x.png" width="124" height="46" alt="Eschatia Labs"></picture></a><br>An [Eschatia Labs](https://eschatialabs.com) project by [Mert Kaya](https://mertkayacs.com).
