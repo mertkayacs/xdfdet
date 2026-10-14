@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "xdfdet: Explainable deepfake video detection with EfficientNet-B4 and Grad-CAM"
+version: 1.0.0
+authors:
+  - family-names: Kaya
+    given-names: Mert
+    orcid: "https://orcid.org/0009-0006-7018-3027"
+repository-code: "https://github.com/mertkayacs/xdfdet"
+url: "https://xdfdet.mertkayacs.com"
+license: MIT
+preferred-citation:
+  type: thesis
+  title: "Explainable deepfake detection using frame level CNN models: A comparative study of augmentation and cutout techniques"
+  authors:
+    - family-names: Kaya
+      given-names: Mert
+  year: 2025
+  doi: "10.5281/zenodo.18998566"
