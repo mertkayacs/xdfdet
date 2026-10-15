@@ -1,4 +1,4 @@
-<h1 align="center">xdfdet: one of the most accurate explainable deepfake detectors</h1>
+<h1 align="center">xdfdet</h1>
 
 <p align="center"><b>Eight EfficientNet-B4 models, Grad-CAM heatmaps and facial-region analysis for deepfake video detection, from an MSc thesis and a UBMK 2026 study.</b></p>
 
@@ -11,18 +11,9 @@
 
 xdfdet checks whether a face video is real or manipulated and produces a heatmap of the regions behind its prediction. The study asks how training choices change both detection quality and the evidence a reviewer can inspect.
 
-<img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/strip-gradcam.webp" width="520" alt="Grad-CAM heatmaps of four training setups on the same real portrait: baseline, augmentation, cutout, and augmentation with cutout, the best setup">
+<img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/strip-gradcam.webp" width="520" alt="Grad-CAM heatmaps of four training setups on the same real portrait: baseline, augmentation, cutout, and augmentation with black-fill cutout">
 
 [Read the study](https://xdfdet.mertkayacs.com) or try one of the eight released detectors below.
-
-## Why xdfdet is one of the best open deepfake detectors
-
-- **0.8971 mean AUC** on FaceForensics++ for the best configuration (aug-cutout-black), up from 0.8678 for the baseline EfficientNet-B4 (UBMK 2026 study, mean over three runs).
-- **Eight released EfficientNet-B4 checkpoints** on Hugging Face and Kaggle, with 727 Hugging Face downloads.
-- **Grad-CAM region analysis** over eight facial regions, so you can inspect what the model looked at.
-- **Open code under MIT**; model weights are CC BY-NC 4.0 under the FaceForensics++ research terms.
-
-xdfdet shows that a small change in augmentation can push both ranking and calibration, while Grad-CAM lets a reviewer see where the model is looking.
 
 ## Run a detector
 
@@ -32,23 +23,64 @@ Requires Python 3.10 to 3.12. Model weights download from Hugging Face on first 
 pip install git+https://github.com/mertkayacs/xdfdet && xdfdet predict video.mp4 --gradcam cam.png
 ```
 
-The command returns a real-video probability and verdict, and saves a Grad-CAM heatmap to `cam.png`. Grad-CAM shows which image regions influence a prediction; it does not prove that the video is authentic or explain the cause of a manipulation.
+The command returns a real-video probability and verdict, and saves a Grad-CAM heatmap to `cam.png`. Scores of 0.5 or higher are reported as real; lower scores are reported as fake. Grad-CAM shows which image regions influence a prediction; it does not prove that the video is authentic or explain the cause of a manipulation.
 
 Use the [quickstart notebook](notebooks/quickstart.ipynb) for Python and Colab examples. [Hugging Face](https://huggingface.co/mertkayacs/xdfdet) and [Kaggle](https://www.kaggle.com/models/mertilovski/xdfdet) host the eight EfficientNet-B4 models.
 
-## Study and results
+<details>
+<summary><b>Example output and Python usage</b></summary>
 
-Nine training configurations vary image augmentation and cutout, which masks part of a face during training. The data is a paired subset of FaceForensics++, a widely used dataset of real and manipulated face videos. Each prediction averages frame scores; Grad-CAM attention is measured in eight facial regions.
+For the portrait used in the figures, the released `aug-cutout-black` model produced this output:
+
+```json
+{
+  "model": "aug-cutout-black",
+  "real_probability": 0.9999,
+  "verdict": "real",
+  "regions": {
+    "jaw": 55.2,
+    "left_eyebrow": 74.4,
+    "right_eyebrow": 55.0,
+    "nose": 66.5,
+    "left_eye": 79.2,
+    "right_eye": 62.4,
+    "outer_mouth": 47.6,
+    "inner_mouth": 48.6
+  },
+  "gradcam": "cam.png"
+}
+```
+
+The region values are mean Grad-CAM activation from 0 to 100. Load a released Keras model directly in Python with:
+
+```python
+import xdfdet
+
+model = xdfdet.load_model("aug-cutout-black")
+```
+
+</details>
+
+## Method
+
+1. **Face preparation.** The study pairs 1,000 real FaceForensics++ videos with 1,000 manipulated copies, rotating through FaceSwap, Face2Face, FaceShifter and Deepfakes. MTCNN aligns and crops 32 frames to 224 x 224 pixels. Each model input uses 12 frames.
+2. **Training settings.** Nine EfficientNet-B4 configurations vary Albumentations transforms and cutout. SSIM selects a 2% to 5% facial polygon for fake-frame cutout. Real frames receive a star-shaped cutout with the same fill, and each cutout is applied with probability 0.5.
+3. **Video prediction.** EfficientNet-B4 scores the 12 frames independently. Their mean is the video-level real probability used for the loss and verdict.
+4. **Explanation.** Grad-CAM is averaged across three frames and measured in eight regions derived from 68 facial landmarks. `xdfdet analyze` reports those values separately for true positives, true negatives, false positives and false negatives.
+
+The exact settings are in [`src/xdfdet/config.py`](src/xdfdet/config.py), and [`scripts/make_figures.py`](scripts/make_figures.py) rebuilds the package figures.
+
+## Results
 
 <img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/pair-data.webp" width="620" alt="A real FaceForensics++ video frame next to its manipulated version">
 
 <img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/pair-cutout.webp" width="620" alt="Training-time cutout: a black-filled region on a fake frame and a small star-shaped patch on a real frame">
 
-<img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/pair-explain.webp" width="620" alt="Grad-CAM heatmap of the best setup next to the eight facial regions used to measure attention">
+<img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/pair-explain.webp" width="620" alt="Grad-CAM heatmap of the highest-AUC setup next to the eight facial regions used to measure attention">
 
 In the paper, augmentation with black-fill cutout reached **0.8971 AUC**, compared with **0.8678 for the baseline EfficientNet-B4**. AUC measures how well a detector ranks real and fake videos; higher is better. These are means over three runs. The released checkpoint's AUC is **0.8981**, a separate single-run result.
 
-The four metrics disagree on the best configuration. A ranking score alone does not describe confidence quality or the facial regions used for a prediction.
+The four metrics do not select the same configuration. A ranking score alone does not describe confidence quality or the facial regions used for a prediction.
 
 <details>
 <summary><b>Full results table</b></summary>
@@ -80,35 +112,19 @@ Data, model, optimizer and training schedule are the same in every setting. The 
 
 </details>
 
+## Models
+
+Eight trained detectors are available on [Hugging Face](https://huggingface.co/mertkayacs/xdfdet) and [Kaggle](https://www.kaggle.com/models/mertilovski/xdfdet), with one `.keras` file for each released configuration in the results table. Load one with `xdfdet.load_model(name)` or select it from the CLI with `--model`.
+
+The ninth configuration, `aug-intense`, has no released checkpoint because its original file was overwritten by a later run. Its paper result remains in the table for completeness.
+
 ## Limits
 
-On 398 labelled videos from the separate Deepfake Detection Challenge dataset (DFDC), the released models reached AUC 0.60 to 0.66, below their FaceForensics++ scores. They detected 15% to 36% of the fakes. See the [DFDC evaluation notebook](https://www.kaggle.com/code/mertilovski/xdfdet-on-dfdc) for that run.
+On 398 labelled videos from the separate Deepfake Detection Challenge dataset (DFDC), the released models reached AUC 0.60 to 0.66, below their FaceForensics++ scores. At the 0.5 decision threshold, they detected 15% to 36% of the fakes. See the [DFDC evaluation notebook](https://www.kaggle.com/code/mertilovski/xdfdet-on-dfdc) for that run.
 
 The original configurations used different random train/test splits. Their results are not a paired comparison on one common test set. Published weights may have seen another configuration's test videos during training. Read the original-run notes below before comparing or re-scoring checkpoints.
 
 These are research detectors. A verdict or heatmap is insufficient evidence for an authenticity decision on an unfamiliar video.
-
-## Frequently asked questions
-
-**What is xdfdet?**
-
-xdfdet is an open deepfake video detector that returns a real-or-fake verdict plus a Grad-CAM heatmap showing which face regions influenced the prediction. It ships eight EfficientNet-B4 checkpoints from an MSc thesis and a UBMK 2026 study, with 727 Hugging Face downloads.
-
-**How do I detect deepfakes with Grad-CAM?**
-
-Run `xdfdet predict video.mp4 --gradcam cam.png`. The saved heatmap highlights the image regions that pushed the model toward its decision. It helps a reviewer inspect the model, but it does not prove authenticity. The best paper configuration reached 0.8971 AUC on FaceForensics++. The baseline EfficientNet-B4 scored 0.8678.
-
-**What is the best deepfake detection model in xdfdet?**
-
-The `aug-cutout-black` configuration reached the highest mean AUC in the paper, 0.8971 on FaceForensics++, compared with 0.8678 for the baseline EfficientNet-B4. The released checkpoint scored 0.8981 in a single run, and the weights are on Hugging Face. The model has 727 Hugging Face downloads.
-
-**Can I use xdfdet on my own videos?**
-
-Yes, with caution. The models need a clear face video and work best on content similar to FaceForensics++. Performance on the separate DFDC dataset was much lower, with released models reaching AUC 0.60 to 0.66 and detecting 15% to 36% of fakes, so treat results as research signals, not legal evidence.
-
-**Where can I read the xdfdet paper?**
-
-The UBMK 2026 paper is accepted and will appear in IEEE Xplore; no DOI is available yet. The MSc thesis behind the code has a Zenodo DOI: [10.5281/zenodo.18998566](https://doi.org/10.5281/zenodo.18998566). The eight released checkpoints are on Hugging Face. The code is open source under MIT and the weights under CC BY-NC 4.0.
 
 ## Reproduce the study
 
