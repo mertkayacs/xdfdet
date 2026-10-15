@@ -1,13 +1,16 @@
-<h1 align="center">xdfdet</h1>
-
-<p align="center"><b>Eight EfficientNet-B4 models, Grad-CAM heatmaps and facial-region analysis for deepfake video detection, from an MSc thesis and a UBMK 2026 study.</b></p>
+<p align="center"><img src="assets/banner.webp" alt="xdfdet. Free and open source under the MIT license." width="1200"></p>
 
 <p align="center">
   <a href="https://github.com/mertkayacs/xdfdet"><img src="https://img.shields.io/github/stars/mertkayacs/xdfdet?style=flat&logo=github" alt="GitHub stars"></a>
   <a href="https://huggingface.co/mertkayacs/xdfdet"><img src="https://img.shields.io/badge/HF%20downloads%20(2026--10--15)-727-725114?style=flat&logo=huggingface" alt="Hugging Face downloads"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/code%20license-MIT-0F6B66.svg" alt="MIT"></a>
+  <img src="https://img.shields.io/badge/free%20and%20open%20source-yes-0F6B66.svg" alt="free and open source">
   <a href="https://doi.org/10.5281/zenodo.18998566"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.18998566-blue?style=flat" alt="thesis DOI"></a>
 </p>
+
+xdfdet is free and open source under the MIT license.
+
+<p align="center"><b>Eight EfficientNet-B4 models, Grad-CAM heatmaps and facial-region analysis for deepfake video detection, from an MSc thesis and a UBMK 2026 study.</b></p>
 
 xdfdet checks whether a face video is real or manipulated and produces a heatmap of the regions behind its prediction. The study asks how training choices change both detection quality and the evidence a reviewer can inspect.
 
