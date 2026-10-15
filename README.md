@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/mertkayacs/xdfdet"><img src="https://img.shields.io/github/stars/mertkayacs/xdfdet?style=flat&logo=github" alt="GitHub stars"></a>
-  <a href="https://huggingface.co/mertkayacs/xdfdet"><img src="https://img.shields.io/badge/HF%20downloads-727-725114?style=flat&logo=huggingface" alt="Hugging Face downloads"></a>
+  <a href="https://huggingface.co/mertkayacs/xdfdet"><img src="https://img.shields.io/badge/HF%20downloads%20(2026--10--15)-727-725114?style=flat&logo=huggingface" alt="Hugging Face downloads"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/code%20license-MIT-0F6B66.svg" alt="MIT"></a>
   <a href="https://doi.org/10.5281/zenodo.18998566"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.18998566-blue?style=flat" alt="thesis DOI"></a>
 </p>
@@ -22,7 +22,7 @@ xdfdet checks whether a face video is real or manipulated and produces a heatmap
 - **Grad-CAM region analysis** over eight facial regions, so you can inspect what the model looked at.
 - **Open code under MIT**; model weights are CC BY-NC 4.0 under the FaceForensics++ research terms.
 
-> "xdfdet shows that a small change in augmentation can push both ranking and calibration, while Grad-CAM lets a reviewer see where the model is looking." - Mert Kaya
+xdfdet shows that a small change in augmentation can push both ranking and calibration, while Grad-CAM lets a reviewer see where the model is looking.
 
 ## Run a detector
 
