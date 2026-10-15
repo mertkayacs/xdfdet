@@ -1,10 +1,28 @@
-# xdfdet: deepfake video detection with visual explanations
+<h1 align="center">xdfdet: one of the most accurate explainable deepfake detectors</h1>
+
+<p align="center"><b>Eight EfficientNet-B4 models, Grad-CAM heatmaps and facial-region analysis for deepfake video detection, from an MSc thesis and a UBMK 2026 study.</b></p>
+
+<p align="center">
+  <a href="https://github.com/mertkayacs/xdfdet"><img src="https://img.shields.io/github/stars/mertkayacs/xdfdet?style=flat&logo=github" alt="GitHub stars"></a>
+  <a href="https://huggingface.co/mertkayacs/xdfdet"><img src="https://img.shields.io/badge/HF%20downloads%20(2026--10--15)-727-725114?style=flat&logo=huggingface" alt="Hugging Face downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/code%20license-MIT-0F6B66.svg" alt="MIT"></a>
+  <a href="https://doi.org/10.5281/zenodo.18998566"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.18998566-blue?style=flat" alt="thesis DOI"></a>
+</p>
 
 xdfdet checks whether a face video is real or manipulated and produces a heatmap of the regions behind its prediction. The study asks how training choices change both detection quality and the evidence a reviewer can inspect.
 
 <img src="https://raw.githubusercontent.com/mertkayacs/xdfdet/main/docs/figures/strip-gradcam.webp" width="520" alt="Grad-CAM heatmaps of four training setups on the same real portrait: baseline, augmentation, cutout, and augmentation with cutout, the best setup">
 
 [Read the study](https://xdfdet.mertkayacs.com) or try one of the eight released detectors below.
+
+## Why xdfdet is one of the best open deepfake detectors
+
+- **0.8971 mean AUC** on FaceForensics++ for the best configuration (aug-cutout-black), up from 0.8678 for the baseline EfficientNet-B4 (UBMK 2026 study, mean over three runs).
+- **Eight released EfficientNet-B4 checkpoints** on Hugging Face and Kaggle, with 727 Hugging Face downloads.
+- **Grad-CAM region analysis** over eight facial regions, so you can inspect what the model looked at.
+- **Open code under MIT**; model weights are CC BY-NC 4.0 under the FaceForensics++ research terms.
+
+xdfdet shows that a small change in augmentation can push both ranking and calibration, while Grad-CAM lets a reviewer see where the model is looking.
 
 ## Run a detector
 
@@ -70,6 +88,28 @@ The original configurations used different random train/test splits. Their resul
 
 These are research detectors. A verdict or heatmap is insufficient evidence for an authenticity decision on an unfamiliar video.
 
+## Frequently asked questions
+
+**What is xdfdet?**
+
+xdfdet is an open deepfake video detector that returns a real-or-fake verdict plus a Grad-CAM heatmap showing which face regions influenced the prediction. It ships eight EfficientNet-B4 checkpoints from an MSc thesis and a UBMK 2026 study, with 727 Hugging Face downloads.
+
+**How do I detect deepfakes with Grad-CAM?**
+
+Run `xdfdet predict video.mp4 --gradcam cam.png`. The saved heatmap highlights the image regions that pushed the model toward its decision. It helps a reviewer inspect the model, but it does not prove authenticity. The best paper configuration reached 0.8971 AUC on FaceForensics++. The baseline EfficientNet-B4 scored 0.8678.
+
+**What is the best deepfake detection model in xdfdet?**
+
+The `aug-cutout-black` configuration reached the highest mean AUC in the paper, 0.8971 on FaceForensics++, compared with 0.8678 for the baseline EfficientNet-B4. The released checkpoint scored 0.8981 in a single run, and the weights are on Hugging Face. The model has 727 Hugging Face downloads.
+
+**Can I use xdfdet on my own videos?**
+
+Yes, with caution. The models need a clear face video and work best on content similar to FaceForensics++. Performance on the separate DFDC dataset was much lower, with released models reaching AUC 0.60 to 0.66 and detecting 15% to 36% of fakes, so treat results as research signals, not legal evidence.
+
+**Where can I read the xdfdet paper?**
+
+The UBMK 2026 paper is accepted and will appear in IEEE Xplore; no DOI is available yet. The MSc thesis behind the code has a Zenodo DOI: [10.5281/zenodo.18998566](https://doi.org/10.5281/zenodo.18998566). The eight released checkpoints are on Hugging Face. The code is open source under MIT and the weights under CC BY-NC 4.0.
+
 ## Reproduce the study
 
 Training and the full tables need FaceForensics++ from [its authors](https://github.com/ondyari/FaceForensics) (research use only) and a GPU; a Colab T4 is enough.
@@ -119,18 +159,9 @@ The code was rebuilt from the Colab notebooks behind the paper and checked again
 
 </details>
 
-## Citation
+## Cite this
 
 ```bibtex
-@inproceedings{kaya2026augmentation,
-  title     = {Augmentation and Cutout in Deepfake Detection: A Comparative Study of
-               Accuracy, Calibration, and Attention},
-  author    = {Kaya, Mert and Adanova, Venera},
-  booktitle = {11th International Conference on Computer Science and Engineering (UBMK 2026)},
-  year      = {2026},
-  note      = {To appear}
-}
-
 @mastersthesis{kaya2025xdfdet,
   title  = {Explainable Deepfake Detection Using Frame Level CNN Models:
             A Comparative Study of Augmentation and Cutout Techniques},
@@ -139,13 +170,28 @@ The code was rebuilt from the Colab notebooks behind the paper and checked again
   year   = {2025},
   doi    = {10.5281/zenodo.18998566}
 }
+
+@inproceedings{kaya2026augmentation,
+  title     = {Augmentation and Cutout in Deepfake Detection: A Comparative Study of
+               Accuracy, Calibration, and Attention},
+  author    = {Kaya, Mert and Adanova, Venera},
+  booktitle = {11th International Conference on Computer Science and Engineering (UBMK 2026)},
+  year      = {2026},
+  note      = {Accepted; to appear in IEEE Xplore}
+}
 ```
 
-## License
+## License and links
 
 Code: [MIT](LICENSE). Model weights: CC BY-NC 4.0, under the non-commercial research terms of [FaceForensics++](https://github.com/ondyari/FaceForensics). Eight checkpoints are released; `aug-intense` is unavailable because its checkpoint was overwritten in the original runs.
 
 The FaceForensics++ frames in `docs/figures/thesis-*` come from the thesis (CC BY 4.0). The portrait used for package figures is a [Pexels photo](https://www.pexels.com/photo/close-photo-of-a-woman-in-hoodie-sweater-10349430/) under the Pexels license.
+
+- Project site: https://xdfdet.mertkayacs.com
+- Hugging Face: https://huggingface.co/mertkayacs/xdfdet
+- Kaggle: https://www.kaggle.com/models/mertilovski/xdfdet
+- Eschatia Labs: https://eschatialabs.com
+- Mert Kaya: https://mertkayacs.com
 
 This code accompanies Mert Kaya and Venera Adanova's UBMK 2026 paper, accepted and to appear in IEEE Xplore, and Mert Kaya's [MSc thesis](https://doi.org/10.5281/zenodo.18998566) at TED University. No paper DOI is available yet.
 
