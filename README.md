@@ -13,9 +13,9 @@
 </p>
 
 <p align="center">
-  <a href="pyproject.toml"><img alt="Version 1.0.1" src="https://img.shields.io/badge/version-1.0.1-8A6D3B?style=flat-square"></a>
+  <a href="pyproject.toml"><img alt="Version 1.0.2" src="https://img.shields.io/badge/version-1.0.2-8A6D3B?style=flat-square"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square"></a>
-  <img alt="TensorFlow 2.20 and Keras 3.10" src="https://img.shields.io/badge/TensorFlow%202.20%20%2B%20Keras%203.10-FF6F00?style=flat-square&logo=tensorflow&logoColor=white">
+  <img alt="TensorFlow 2.21 and Keras 3.15" src="https://img.shields.io/badge/TensorFlow%202.21%20%2B%20Keras%203.15-FF6F00?style=flat-square&logo=tensorflow&logoColor=white">
   <a href="https://huggingface.co/mertkayacs/xdfdet"><img alt="Eight released models on Hugging Face" src="https://img.shields.io/badge/models-8%20on%20Hugging%20Face-1E2A38?style=flat-square"></a>
   <a href="https://doi.org/10.1109/UBMK71847.2026.11745298"><img alt="Paper: IEEE UBMK 2026" src="https://img.shields.io/badge/paper-IEEE%20UBMK%202026-00629B?style=flat-square"></a>
   <a href="https://github.com/mertkayacs/xdfdet"><img alt="GitHub stars" src="https://img.shields.io/github/stars/mertkayacs/xdfdet?style=flat-square&logo=github&color=8A6D3B"></a>
@@ -50,7 +50,7 @@ In high-stakes settings, a detector's verdict helps only when someone can check 
 | <img src="docs/assets/readme/icons/scan-face.svg" width="18" height="18" alt=""> **Evidence for each verdict** | `xdfdet predict --gradcam` saves a Grad-CAM heatmap and scores the activation from 0 to 100 in eight facial regions built from 68 landmarks. `xdfdet analyze` splits those scores by correct and wrong predictions ([explain.py](src/xdfdet/explain.py)). |
 | <img src="docs/assets/readme/icons/flask-conical.svg" width="18" height="18" alt=""> **A controlled comparison** | In the paper, the nine setups share data, model, optimizer, training schedule and dropout 0.55, and vary augmentation and cutout. The notebook of the released `aug-cutout-random` checkpoint used dropout 0.25 ([config.py](src/xdfdet/config.py)). Augmentation with black-fill cutout reached 0.8971 AUC against 0.8678 for the baseline, means over three runs. |
 | <img src="docs/assets/readme/icons/gauge.svg" width="18" height="18" alt=""> **Calibration next to accuracy** | Every setup is scored on AUC, F1, Brier score and log loss, and the four measures favor different setups: augmentation with random-fill cutout has the lowest log loss (0.4656), augmentation with black-fill cutout the highest AUC. |
-| <img src="docs/assets/readme/icons/package.svg" width="18" height="18" alt=""> **Eight released models** | One `.keras` file per released setup on [Hugging Face](https://huggingface.co/mertkayacs/xdfdet) and [Kaggle](https://www.kaggle.com/models/mertilovski/xdfdet), under CC BY-NC 4.0. `xdfdet.load_model(name)` downloads one on first use. |
+| <img src="docs/assets/readme/icons/package.svg" width="18" height="18" alt=""> **Eight released models** | One `.keras` file per released setup on [Hugging Face](https://huggingface.co/mertkayacs/xdfdet) and [Kaggle](https://www.kaggle.com/models/mertilovski/xdfdet), under CC BY-NC 4.0. `xdfdet.load_model(name)` downloads one on first use and reads only its weights. |
 | <img src="docs/assets/readme/icons/triangle-alert.svg" width="18" height="18" alt=""> **Limits on record** | On 398 unseen DFDC videos the same models reach AUC 0.60 to 0.66 and catch 15% to 36% of the fakes ([Kaggle notebook](https://www.kaggle.com/code/mertilovski/xdfdet-on-dfdc)). Performance across age, sex and skin tone was not measured. |
 | <img src="docs/assets/readme/icons/file-check.svg" width="18" height="18" alt=""> **Traceable to the paper** | Settings come from the original Colab notebooks, and the [notes on the original runs](#notes-on-the-original-runs) list where the notebooks differ from the paper. The paper is in [IEEE Xplore](https://ieeexplore.ieee.org/document/11745298), pages 78 to 83. |
 
@@ -107,7 +107,7 @@ In high-stakes settings, a detector's verdict helps only when someone can check 
 
 - `xdfdet predict` scores one video and prints JSON: the probability that it is real, the verdict (real at 0.5 or higher) and, with `--gradcam`, eight region scores and a heatmap.
 - MTCNN face detection with eye alignment, 32 evenly spaced frames cropped to 224 x 224, and 12 of them per model input. The video score is the mean of the frame scores.
-- Eight released EfficientNet-B4 checkpoints, chosen with `--model`, or any `.keras` file.
+- Eight released EfficientNet-B4 checkpoints, chosen with `--model`, or a `.keras` file from `xdfdet train`.
 
 **Explanation**
 
@@ -129,14 +129,14 @@ In high-stakes settings, a detector's verdict helps only when someone can check 
 
 ## Quick start
 
-With Python 3.10 to 3.13, install the package from GitHub and score a video:
+With Python 3.11 to 3.13, install the package from GitHub and score a video:
 
 ```sh
 pip install git+https://github.com/mertkayacs/xdfdet
 xdfdet predict video.mp4 --gradcam cam.png
 ```
 
-The first run downloads the default `aug-cutout-black` model (72 MB) from Hugging Face and, for `--gradcam`, dlib's landmark model (64 MB). For a 50-frame clip, astronaut.mp4, made from the public-domain NASA portrait that ships with scikit-image (`skimage.data.astronaut()`), the command prints:
+The first run downloads the default `aug-cutout-black` model (72 MB) from Hugging Face, the ImageNet EfficientNet-B4 weights that Keras uses to build the architecture (72 MB) and, for `--gradcam`, dlib's landmark model (64 MB). For a 50-frame clip, astronaut.mp4, made from the public-domain NASA portrait that ships with scikit-image (`skimage.data.astronaut()`), the command prints:
 
 ```json
 {
@@ -170,8 +170,9 @@ model = xdfdet.load_model("aug-cutout-black")
 
 ### Requirements
 
-- Python 3.10 to 3.13. TensorFlow 2.20 and Keras 3.10 are pinned in [pyproject.toml](pyproject.toml) because Keras 3.11.3, 3.12.4, 3.13.2, 3.14.1 and 3.15.1 cannot load the released checkpoints.
-- Prediction needs no GPU and no dataset. The first run with `--gradcam` downloads about 136 MB.
+- Python 3.11 to 3.13 with TensorFlow 2.21 and Keras 3.15.1, pinned in [pyproject.toml](pyproject.toml). Keras 3.15.1 carries the fixes for the Keras security advisories.
+- `xdfdet.load_model` builds the architecture in code and reads only `model.weights.h5` from each `.keras` file, so it never deserializes a saved model config.
+- Prediction needs no GPU and no dataset. The first run with `--gradcam` downloads about 208 MB.
 - Training and the full tables need FaceForensics++ from [its authors](https://github.com/ondyari/FaceForensics) and a GPU. The original runs used a Colab T4.
 
 ## Study and results
@@ -269,7 +270,7 @@ Presented at UBMK 2026 in Istanbul and published in IEEE Xplore. Please cite the
 <details>
 <summary><b>Can I run a detector on my own video?</b></summary>
 
-Yes. Install the package and run `xdfdet predict video.mp4 --gradcam cam.png` with Python 3.10 to 3.13. It prints the probability that the video is real, a verdict and the region scores, and saves the heatmap. Prediction runs on a CPU and needs no training data.
+Yes. Install the package and run `xdfdet predict video.mp4 --gradcam cam.png` with Python 3.11 to 3.13. It prints the probability that the video is real, a verdict and the region scores, and saves the heatmap. Prediction runs on a CPU and needs no training data.
 </details>
 
 <details>
@@ -297,9 +298,9 @@ The `aug-standard` and `aug-intense` runs saved to the same file name, and the l
 </details>
 
 <details>
-<summary><b>Why are TensorFlow and Keras pinned to older versions?</b></summary>
+<summary><b>Why does xdfdet build the model in code?</b></summary>
 
-The released checkpoints were saved with Keras 3.10. In a Kaggle check in November 2026, Keras 3.12.4, 3.13.2, 3.14.1 and 3.15.1 failed to load them with a TimeDistributed shape error, and Keras 3.11.3 with a channel mismatch in the first convolution. TensorFlow 2.20 with Keras 3.10 loads all eight and reproduces the scores recorded in `conversion.json` exactly.
+The released checkpoints were saved with Keras 3.10, and newer Keras releases cannot rebuild their saved configs: in a Kaggle check in November 2026, Keras 3.12.4, 3.13.2, 3.14.1 and 3.15.1 failed with a TimeDistributed shape error, and Keras 3.11.3 with a channel mismatch in the first convolution. `xdfdet.load_model` builds the same EfficientNet-B4 architecture in code and reads only the weights, so it runs on Keras 3.15.1 with its security fixes and reads no config from a downloaded file. With TensorFlow 2.21 and Keras 3.15.1 it loads all eight checkpoints and reproduces the scores recorded in `conversion.json` exactly. Load the files with `xdfdet.load_model`; `keras.saving.load_model` cannot read them on these Keras releases.
 </details>
 
 <details>
