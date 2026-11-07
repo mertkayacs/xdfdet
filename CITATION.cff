@@ -10,10 +10,33 @@ repository-code: "https://github.com/mertkayacs/xdfdet"
 url: "https://xdfdet.mertkayacs.com"
 license: MIT
 preferred-citation:
-  type: thesis
-  title: "Explainable deepfake detection using frame level CNN models: A comparative study of augmentation and cutout techniques"
+  type: conference-paper
+  title: "Augmentation and Cutout in Deepfake Detection: A Comparative Study of Accuracy, Calibration, and Attention"
   authors:
     - family-names: Kaya
       given-names: Mert
-  year: 2025
-  doi: "10.5281/zenodo.18998566"
+      orcid: "https://orcid.org/0009-0006-7018-3027"
+    - family-names: Adanova
+      given-names: Venera
+      orcid: "https://orcid.org/0000-0001-7247-0288"
+  collection-title: "2026 11th International Conference on Computer Science and Engineering (UBMK)"
+  collection-type: proceedings
+  publisher:
+    name: IEEE
+  start: 78
+  end: 83
+  year: 2026
+  doi: "10.1109/UBMK71847.2026.11745298"
+  url: "https://ieeexplore.ieee.org/document/11745298"
+references:
+  - type: thesis
+    title: "Explainable deepfake detection using frame level CNN models: A comparative study of augmentation and cutout techniques"
+    authors:
+      - family-names: Kaya
+        given-names: Mert
+        orcid: "https://orcid.org/0009-0006-7018-3027"
+    thesis-type: "Master's thesis"
+    institution:
+      name: TED University
+    year: 2025
+    doi: "10.5281/zenodo.18998566"
