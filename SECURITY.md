@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please report security problems privately. Open the [Security tab](https://github.com/mertkayacs/xdfdet/security) of this repository and choose **Report a vulnerability**. Please do not open a public issue for a security problem.
+Please report security problems privately. Open the [Security and quality tab](https://github.com/mertkayacs/xdfdet/security) of this repository and choose **Report a vulnerability**. Please do not open a public issue for a security problem.
 
 Include the affected file or command, the steps to reproduce it and the impact you expect. I read every report and reply in the private advisory.
 
