@@ -4,16 +4,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xdfdet"
-version = "1.0.0"
+version = "1.0.1"
 description = "Frame-level deepfake detection with Grad-CAM region analysis (EfficientNet-B4, FaceForensics++)"
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Mert Kaya" }]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<3.14"
 # Pin runtime versions so model inference remains reproducible.
+# Held at TensorFlow 2.20 and Keras 3.10: Keras 3.11.3, 3.12.4, 3.13.2, 3.14.1 and 3.15.1 cannot load the released checkpoints.
 dependencies = [
-    "tensorflow==2.21.0",
-    "keras==3.15.1",
+    "tensorflow==2.20.0",
+    "keras==3.10.0",
     "albumentations==1.4.24",
     "albucore==0.0.23",
     "opencv-python-headless==4.14.0.94",
