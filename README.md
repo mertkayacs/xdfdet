@@ -136,7 +136,7 @@ pip install git+https://github.com/mertkayacs/xdfdet
 xdfdet predict video.mp4 --gradcam cam.png
 ```
 
-The first run downloads the default `aug-cutout-black` model (72 MB) from Hugging Face, the ImageNet EfficientNet-B4 weights that Keras uses to build the architecture (72 MB) and, for `--gradcam`, dlib's landmark model (64 MB). For a 50-frame clip, astronaut.mp4, made from the public-domain NASA portrait that ships with scikit-image (`skimage.data.astronaut()`), the command prints:
+The first run downloads the default `aug-cutout-black` model (72 MB) from Hugging Face and, for `--gradcam`, dlib's landmark model (64 MB). For a 50-frame clip, astronaut.mp4, made from the public-domain NASA portrait that ships with scikit-image (`skimage.data.astronaut()`), the command prints:
 
 ```json
 {
@@ -172,7 +172,7 @@ model = xdfdet.load_model("aug-cutout-black")
 
 - Python 3.11 to 3.13 with TensorFlow 2.21 and Keras 3.15.1, pinned in [pyproject.toml](pyproject.toml). Keras 3.15.1 carries the fixes for the Keras security advisories.
 - `xdfdet.load_model` builds the architecture in code and reads only `model.weights.h5` from each `.keras` file, so it never deserializes a saved model config.
-- Prediction needs no GPU and no dataset. The first run with `--gradcam` downloads about 208 MB.
+- Prediction needs no GPU and no dataset. The first run with `--gradcam` downloads about 136 MB.
 - Training and the full tables need FaceForensics++ from [its authors](https://github.com/ondyari/FaceForensics) and a GPU. The original runs used a Colab T4.
 
 ## Study and results
