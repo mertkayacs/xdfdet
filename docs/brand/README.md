@@ -1,46 +1,78 @@
-# xdfdet brand kit
+# xdfdet logo
 
-The xdfdet mark is a viewfinder, four corner brackets around a gold diamond. The logo pairs it with the wordmark `xdfdet` set in Newsreader.
+**The idea:** the name has two identical d's, like a real frame and its deepfake; the logo flags one of them, its bowl
+holding a gold core inside a contour line, a heat map reduced to one level that shows where the evidence is.
+
+The flagged d is the d that sits second in the name (the d of "df"). The wordmark always carries the flag, and the
+mark is that same d on its own.
 
 ## Files
 
-| Use | File |
+| File | Use |
 |---|---|
-| Logo on a light background | `svg/xdfdet-logo-on-light.svg`, `png/xdfdet-logo-on-light-1600.png` |
-| Logo on a dark background | `svg/xdfdet-logo-on-dark.svg`, `png/xdfdet-logo-on-dark-1600.png` |
-| Mark alone on a light background | `svg/xdfdet-mark.svg`, `png/xdfdet-mark-1024.png` |
-| Mark alone on a dark background | `svg/xdfdet-mark-on-dark.svg` |
-| App icon (512 px tile, corner radius 112) | `svg/xdfdet-appicon.svg`, `png/xdfdet-appicon-1024.png` |
-| Favicon, the app icon tile at small size (reads on light and dark tabs) | `favicon/favicon.svg` |
-| The same favicon for older browsers (16, 32 and 48 px in one file) | `favicon/favicon.ico` |
-| The same favicon as a 32 px PNG | `favicon/favicon-32.png` |
-| Home screen icon (180 px, opaque) | `favicon/apple-touch-icon.png` |
+| `svg/xdfdet-logo-on-light.svg` | Main logo on light grounds. The flagged d sits inside the name. Height 256. |
+| `svg/xdfdet-logo-on-dark.svg` | Main logo on dark grounds (#0D1117, #1F2430, navy). |
+| `svg/xdfdet-logo-stacked.svg` | Mark above the name, for square spaces and covers. |
+| `svg/xdfdet-mark.svg` | The mark on light grounds, from 32 px up. |
+| `svg/xdfdet-mark-on-dark.svg` | The mark on dark grounds (#0D1117 and #1F2430), slightly thinner so it looks the same weight. |
+| `svg/xdfdet-mark-black.svg`, `svg/xdfdet-mark-white.svg` | One-colour versions for print, stamps, engraving. |
+| `svg/xdfdet-sticker.svg` | The mark with its white die-cut border, for the sticker sheet. |
+| `svg/xdfdet-appicon.svg` | App icon: the mark on a navy rounded tile, 1024 canvas. |
+| `favicon/favicon.svg` | Browser tab icon: a small-size cut of the d, drawn to the 16 px grid. It switches to the paper colour in dark mode. |
+| `favicon/favicon.ico`, `favicon/favicon-32.png` | The small cut on a navy tile, for places that cannot follow dark mode. |
+| `favicon/apple-touch-icon.png`, `favicon/icon-192.png`, `favicon/icon-512.png`, `favicon/icon-maskable-512.png` | Home-screen and web-app icons on full-bleed navy; the maskable icon keeps the mark inside the 80 % safe zone. |
+| `png/` | PNG exports rendered from the SVGs. |
 
-The logo and mark PNGs have transparent backgrounds. The app icon PNG and the favicons have transparent rounded corners. The home screen icon is a full opaque square, because iOS rounds the corners itself.
+## Colours
 
-## Colour
+Contrast is the WCAG ratio, measured from the HEX values.
 
-| Role | Light surfaces | Contrast on #FFFFFF / #FDF8F1 | Dark surfaces | Contrast on #0D1117 / #12171D |
-|---|---|---|---|---|
-| Ink | `#1E2A38` | 14.55 / 13.77 | `#EEE7DB` | 15.40 / 14.66 |
-| Accent | `#A38046` | 3.66 / 3.47 | `#D4B981` | 9.96 / 9.48 |
+| Colour | HEX | Use | on #FFFFFF | on #FDF8F1 | on #0D1117 |
+|---|---|---|---|---|---|
+| Navy | `#1E2A38` | Letters on light grounds, tiles | 14.55 : 1 | 13.77 : 1 | 1.30 : 1 (do not use) |
+| Gold | `#A38046` | The evidence core, nothing else | 3.66 : 1 | 3.47 : 1 | 5.17 : 1 |
+| Paper | `#F3ECE2` | Letters on dark grounds | 1.17 : 1 (do not use) | 1.11 : 1 (do not use) | 16.14 : 1 |
 
-| App icon | Colour | Contrast on the tile |
-|---|---|---|
-| Tile | `#1E2A38` | |
-| Ink | `#EEE7DB` | 11.84 |
-| Accent | `#D4B981` | 7.66 |
+Gold is a graphic, never text, so the 3 : 1 rule for graphics applies; it passes on all three grounds. On #1F2430,
+navy measures 1.07 : 1 and paper 13.23 : 1, so dark sheets take the on-dark files or the sticker.
 
-README icon colour: `#967339`, 4.37 on #FFFFFF and 4.33 on #0D1117.
+## Clear space
 
-## Usage
+Keep the height of the x in "xdfdet" clear on every side of the logo. Around the mark alone, keep the height of its
+gold core clear.
 
-- Pick the file that matches the background: on-light files for white or paper, on-dark files for dark surfaces. In a README, use a `<picture>` element with the dark logo as the `prefers-color-scheme: dark` source.
-- Keep clear space around the logo of at least half the height of the mark.
-- Smallest sizes: 16 px for the mark, 120 px wide for the logo.
-- The wordmark is drawn as outlined paths, so it looks the same everywhere. Use the supplied files and leave the letters as they are.
-- Do not recolour, rotate, stretch, outline or add effects to the mark.
+## Minimum sizes
 
-## Font
+These were checked on screen:
 
-Newsreader, wght 600, opsz 48. Source: `Newsreader[opsz,wght].ttf` from [google/fonts](https://github.com/google/fonts/tree/86aced91de05cd4f96a06838124cca45be337b2b/ofl/newsreader) at commit `86aced91de05`. Licence: SIL Open Font License 1.1. The letters are converted to paths, so the font is not needed to display the logo.
+- Logo: 96 px wide.
+- Stacked logo: 120 px wide.
+- Mark: 32 px.
+- Small cut (`favicon.svg`): 16 px.
+- Sticker: 24 px.
+
+Below 32 px use the small cut. Print sizes have not been proofed.
+
+## Font and licence
+
+The wordmark is Newsreader by Production Type (variable font from the google/fonts repository; wordmark at optical
+size 24 and weight 560, mark at weight 600, reversed files 20 weight units lighter, favicon cut at optical size 6). The
+letters are outlined, so no font is needed to show the logo. Newsreader is licensed under the SIL Open Font License
+1.1 (Copyright 2020 The Newsreader Project Authors). The licence's own condition 5 says its terms do not apply to
+documents created using the font, which covers this artwork. The site already sets its headings in Newsreader.
+
+## Do
+
+- Use the flagged wordmark as the main logo, and the mark where the space is square or small.
+- Use the on-dark files on dark grounds, and the sticker file on coloured sheets.
+- Keep gold for the core alone.
+- Keep the contour line between the core and the letter; it is part of the idea.
+- Use `favicon.svg` for tabs and anything under 32 px.
+
+## Don't
+
+- Flag both d's, or move the flag to another letter.
+- Recolour the core, fill the contour line, or put the navy logo on a dark ground.
+- Stretch, rotate, outline, shadow, glow or add a gradient to any part.
+- Retype "xdfdet" in a font, live or not; use the files.
+- Use the full mark below 32 px.
