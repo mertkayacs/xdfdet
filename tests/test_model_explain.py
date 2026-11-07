@@ -1,3 +1,5 @@
+import zipfile
+
 import numpy as np
 import pytest
 
@@ -48,6 +50,19 @@ def test_cases_treat_fake_as_positive():
 def test_metrics():
     m = metrics(np.array([1, 0, 1, 0]), np.array([0.9, 0.1, 0.8, 0.3]))
     assert m["auc"] == 1 and m["f1"] == 1 and m["brier"] < 0.05
+
+
+def test_load_model_reads_only_the_weights(tmp_path, face):
+    from xdfdet.video import normalize
+    saved = build_model(seq_len=12, backbone_weights=None)
+    path = tmp_path / "saved.keras"
+    saved.save(path)
+    broken = tmp_path / "broken.keras"  # same weights, unreadable config
+    with zipfile.ZipFile(path) as src, zipfile.ZipFile(broken, "w") as dst:
+        for item in src.infolist():
+            dst.writestr(item, b"not a model config" if item.filename == "config.json" else src.read(item))
+    x = np.stack([normalize(face)] * 12)[None]
+    assert np.allclose(load_model(str(broken)).predict(x, verbose=0), load_model(str(path)).predict(x, verbose=0))
 
 
 def test_lost_checkpoint_is_reported():
