@@ -1,5 +1,6 @@
 """EfficientNet-B4 video classifier and loading of the released checkpoints."""
 
+import math
 import tempfile
 import zipfile
 from pathlib import Path
@@ -12,6 +13,7 @@ from .config import CONFIGS, IMG_SIZE, SEQ_LEN
 HUB_REPO = "mertkayacs/xdfdet"
 RELEASED = [name for name in CONFIGS if name != "aug-intense"]  # that checkpoint was lost
 WEIGHTS_FILE = "model.weights.h5"  # the weights inside every .keras archive
+IMAGENET_STDDEV = (0.229, 0.224, 0.225)  # keras.applications.efficientnet.IMAGENET_STDDEV_RGB
 
 
 def build_model(dropout=0.55, seq_len=SEQ_LEN, backbone_weights="imagenet"):
@@ -21,16 +23,35 @@ def build_model(dropout=0.55, seq_len=SEQ_LEN, backbone_weights="imagenet"):
     is the mean over frames. Keras' EfficientNet rescales and normalizes its input
     internally, and the original pipeline also fed ImageNet-normalized frames. The
     released weights were trained that way, so `video.normalize` must stay in front.
+    `backbone_weights=None` builds the same architecture without the ImageNet download.
     """
     inputs = keras.layers.Input((seq_len, IMG_SIZE, IMG_SIZE, 3))
     backbone = keras.applications.EfficientNetB4(
         weights=backbone_weights, include_top=False, input_shape=(IMG_SIZE, IMG_SIZE, 3))
+    if backbone_weights is None:
+        backbone = _with_imagenet_scaling(backbone)
     x = keras.layers.TimeDistributed(backbone)(inputs)
     x = keras.layers.TimeDistributed(keras.layers.GlobalAveragePooling2D())(x)
     x = keras.layers.TimeDistributed(keras.layers.Dropout(dropout))(x)
     outputs = keras.layers.TimeDistributed(keras.layers.Dense(
         1, activation="sigmoid", kernel_regularizer=keras.regularizers.l2(1e-3), dtype="float32"))(x)
     return keras.Model(inputs, outputs)
+
+
+def _with_imagenet_scaling(backbone):
+    """Add the input scaling that Keras builds only with weights="imagenet".
+
+    With ImageNet weights, which every xdfdet checkpoint started from, Keras puts
+    Rescaling(1 / sqrt(stddev)) right after the backbone's Normalization layer. The scale
+    is part of the architecture, so model.weights.h5 does not hold it. The clone has that
+    layer in the same place, so it computes exactly what the ImageNet build computes.
+    """
+    def call(layer, *args, **kwargs):
+        x = layer(*args, **kwargs)
+        if isinstance(layer, keras.layers.Normalization):
+            x = keras.layers.Rescaling([1 / math.sqrt(s) for s in IMAGENET_STDDEV])(x)
+        return x
+    return keras.models.clone_model(backbone, call_function=call)
 
 
 def video_loss(y_true, y_pred):
@@ -55,23 +76,22 @@ def load_weights(model, path):
 def load_model(name_or_path, mixed_precision=False):
     """Load a released configuration by name (downloaded from Hugging Face) or a local .keras file.
 
-    The architecture comes from `build_model` and only the weights come from the file. The
-    released files are float32. `mixed_precision=True` builds the model in mixed float16,
-    the precision of the original training and test runs, for reproducing the reported
-    scores on a GPU. Scores can differ slightly between the two.
+    The architecture comes from `build_model` (with no ImageNet download) and only the
+    weights come from the file. The released files are float32. `mixed_precision=True`
+    builds the model in mixed float16, the precision of the original training and test
+    runs, for reproducing the reported scores on a GPU. Scores can differ slightly between
+    the two.
     """
-    path, dropout = name_or_path, None
+    path, kwargs = name_or_path, {}  # a local file keeps the default dropout, inactive at inference
     if name_or_path in CONFIGS:
         if name_or_path not in RELEASED:
             raise ValueError(f"no released checkpoint for {name_or_path!r}; train it with `xdfdet train`")
         from huggingface_hub import hf_hub_download
         path = hf_hub_download(HUB_REPO, f"{name_or_path}.keras")
-        dropout = CONFIGS[name_or_path].dropout
+        kwargs["dropout"] = CONFIGS[name_or_path].dropout
     if mixed_precision:
         keras.mixed_precision.set_global_policy("mixed_float16")
-    # Dropout is inactive at inference; a local file keeps the default rate of build_model.
-    model = build_model() if dropout is None else build_model(dropout=dropout)
-    return load_weights(model, path)
+    return load_weights(build_model(backbone_weights=None, **kwargs), path)
 
 
 def video_score(model, frames):

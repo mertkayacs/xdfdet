@@ -1,5 +1,6 @@
 import zipfile
 
+import keras
 import numpy as np
 import pytest
 
@@ -63,6 +64,26 @@ def test_load_model_reads_only_the_weights(tmp_path, face):
             dst.writestr(item, b"not a model config" if item.filename == "config.json" else src.read(item))
     x = np.stack([normalize(face)] * 12)[None]
     assert np.allclose(load_model(str(broken)).predict(x, verbose=0), load_model(str(path)).predict(x, verbose=0))
+
+
+def test_load_model_downloads_no_backbone_weights(tmp_path, monkeypatch):
+    from keras.src.utils import file_utils  # the module keras.applications downloads through
+    path = tmp_path / "saved.keras"
+    build_model(seq_len=12, backbone_weights=None).save(path)
+
+    def refuse(*args, **kwargs):
+        raise AssertionError(f"download attempted: {args} {kwargs}")
+    monkeypatch.setattr(file_utils, "get_file", refuse)
+    assert load_model(str(path)).output_shape == (None, 12, 1)
+
+
+def test_backbone_keeps_the_imagenet_input_scaling():
+    model = build_model(seq_len=12, backbone_weights=None)
+    backbone = next(l.layer for l in model.layers if isinstance(getattr(l, "layer", None), keras.Model))
+    names = [type(l).__name__ for l in backbone.layers]
+    i = names.index("Normalization")
+    assert names[i - 1:i + 2] == ["Rescaling", "Normalization", "Rescaling"]
+    assert np.allclose(backbone.layers[i + 1].scale, 1 / np.sqrt([0.229, 0.224, 0.225]))
 
 
 def test_lost_checkpoint_is_reported():
